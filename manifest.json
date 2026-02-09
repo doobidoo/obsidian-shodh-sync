@@ -3,8 +3,8 @@
   "name": "Shodh Sync",
   "version": "0.1.0",
   "minAppVersion": "1.0.0",
-  "description": "Sync Shodh memories to Obsidian vault in hierarchical folders.",
-  "author": "nanobot (Henry's AI)",
-  "authorUrl": "https://github.com/doobidoo/obsidian-shodh-sync",
+  "description": "Sync Shodh memories to your vault in hierarchical folders.",
+  "author": "Henry Krupp",
+  "authorUrl": "https://github.com/doobidoo",
   "isDesktopOnly": false
 }
