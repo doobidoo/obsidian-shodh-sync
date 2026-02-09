@@ -3,3 +3,9 @@ node_modules/
 main.js.map
 *.tsbuildinfo
 .DS_Store
+
+# Plugin data (contains API keys)
+data.json
+
+# Local Claude Code settings
+.claude/
