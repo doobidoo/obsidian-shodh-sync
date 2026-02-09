@@ -101,17 +101,21 @@ export default class ShodhSync extends Plugin {
 
   async processMemories(memories: any[]) {
     const folder = this.settings.syncFolder;
+    let processed = 0;
+    let failed = 0;
+
     for (const mem of memories) {
-      const date = (mem.created_at || mem.timestamp || new Date().toISOString()).split('T')[0];
-      const tags = mem.tags || [];
-      const year = date.split('-')[0];
-      const month = date.split('-')[1];
-      const folderPath = `${folder}/${year}/${month}`;
+      try {
+        const date = (mem.created_at || mem.timestamp || new Date().toISOString()).split('T')[0];
+        const tags = mem.tags || [];
+        const year = date.split('-')[0];
+        const month = date.split('-')[1];
+        const folderPath = `${folder}/${year}/${month}`;
 
-      const fileName = this.generateFileName(mem, date);
-      const path = `${folderPath}/${fileName}.md`;
+        const fileName = this.generateFileName(mem, date);
+        const path = `${folderPath}/${fileName}.md`;
 
-      const content = `---
+        const content = `---
 date: ${date}
 tags: [${tags.join(', ')}]
 type: ${mem.memory_type || 'unknown'}
@@ -121,17 +125,27 @@ id: ${mem.id}
 ${mem.content}
 `;
 
-      // Ensure folder exists
-      if (!(await this.app.vault.adapter.exists(folderPath))) {
-        await this.app.vault.createFolder(folderPath);
-      }
+        // Ensure folder exists
+        if (!(await this.app.vault.adapter.exists(folderPath))) {
+          await this.app.vault.createFolder(folderPath);
+        }
 
-      // Check if file exists and update or create
-      if (await this.app.vault.adapter.exists(path)) {
-        await this.app.vault.adapter.write(path, content);
-      } else {
-        await this.app.vault.create(path, content);
+        // Check if file exists and update or create
+        if (await this.app.vault.adapter.exists(path)) {
+          await this.app.vault.adapter.write(path, content);
+        } else {
+          await this.app.vault.create(path, content);
+        }
+
+        processed++;
+      } catch (error) {
+        console.error(`Failed to process memory ${mem.id}:`, error);
+        failed++;
       }
+    }
+
+    if (failed > 0) {
+      new Notice(`⚠️ ${failed} memories failed to sync. Check console for details.`);
     }
   }
 
