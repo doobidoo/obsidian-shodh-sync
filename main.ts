@@ -32,6 +32,16 @@ export default class ShodhSync extends Plugin {
 
   async syncMemories() {
     try {
+      const requestBody: any = {
+        query: '*',
+        limit: 1000,
+      };
+
+      // Only include user_id if it's set
+      if (this.settings.userId) {
+        requestBody.user_id = this.settings.userId;
+      }
+
       const response = await requestUrl({
         url: `${this.settings.shodhUrl}/api/recall`,
         method: 'POST',
@@ -39,11 +49,7 @@ export default class ShodhSync extends Plugin {
           'Content-Type': 'application/json',
           'X-API-Key': this.settings.apiKey,
         },
-        body: JSON.stringify({
-          user_id: this.settings.userId,
-          query: '*',
-          limit: 1000,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = response.json;
@@ -57,11 +63,12 @@ export default class ShodhSync extends Plugin {
   async processMemories(memories: any[]) {
     const folder = this.settings.syncFolder;
     for (const mem of memories) {
-      const date = mem.timestamp || new Date().toISOString().split('T')[0];
+      const date = (mem.created_at || mem.timestamp || new Date().toISOString()).split('T')[0];
       const tags = mem.tags || [];
       const year = date.split('-')[0];
       const month = date.split('-')[1];
-      const path = `${folder}/${year}/${month}/${mem.id || 'untitled'}.md`;
+      const folderPath = `${folder}/${year}/${month}`;
+      const path = `${folderPath}/${mem.id || 'untitled'}.md`;
 
       const content = `---
 date: ${date}
@@ -72,7 +79,17 @@ type: ${mem.memory_type || 'unknown'}
 ${mem.content}
 `;
 
-      await this.app.vault.create(path, content);
+      // Ensure folder exists
+      if (!(await this.app.vault.adapter.exists(folderPath))) {
+        await this.app.vault.createFolder(folderPath);
+      }
+
+      // Check if file exists and update or create
+      if (await this.app.vault.adapter.exists(path)) {
+        await this.app.vault.adapter.write(path, content);
+      } else {
+        await this.app.vault.create(path, content);
+      }
     }
   }
 
