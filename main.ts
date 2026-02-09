@@ -47,7 +47,7 @@ export default class ShodhSync extends Plugin {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-API-Key': this.settings.apiKey,
+          'Authorization': `Bearer ${this.settings.apiKey}`,
         },
         body: JSON.stringify(requestBody),
       });
