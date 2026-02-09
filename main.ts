@@ -107,7 +107,20 @@ export default class ShodhSync extends Plugin {
     for (const mem of memories) {
       try {
         const date = (mem.created_at || mem.timestamp || new Date().toISOString()).split('T')[0];
-        const tags = mem.tags || [];
+
+        // Handle tags - can be array or string
+        let tags = mem.tags || [];
+        if (typeof tags === 'string') {
+          try {
+            tags = JSON.parse(tags);
+          } catch {
+            tags = [];
+          }
+        }
+        if (!Array.isArray(tags)) {
+          tags = [];
+        }
+
         const year = date.split('-')[0];
         const month = date.split('-')[1];
         const folderPath = `${folder}/${year}/${month}`;
