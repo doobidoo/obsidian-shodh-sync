@@ -108,13 +108,19 @@ export default class ShodhSync extends Plugin {
       try {
         const date = (mem.created_at || mem.timestamp || new Date().toISOString()).split('T')[0];
 
-        // Handle tags - can be array or string
+        // Handle tags - can be array, JSON string, or CSV string
         let tags = mem.tags || [];
         if (typeof tags === 'string') {
-          try {
-            tags = JSON.parse(tags);
-          } catch {
-            tags = [];
+          // Try JSON parse first (e.g., '["tag1","tag2"]')
+          if (tags.startsWith('[')) {
+            try {
+              tags = JSON.parse(tags);
+            } catch {
+              tags = [];
+            }
+          } else {
+            // Handle CSV format (e.g., 'tag1, tag2, tag3')
+            tags = tags.split(',').map(t => t.trim()).filter(t => t.length > 0);
           }
         }
         if (!Array.isArray(tags)) {
