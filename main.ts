@@ -36,45 +36,36 @@ export default class ShodhSync extends Plugin {
       let allMemories: any[] = [];
       let offset = 0;
       const batchSize = 100;
-      let hasMore = true;
+      let total = 0;
 
-      // Fetch all memories with pagination
-      while (hasMore) {
-        const requestBody: any = {
-          query: '*',
-          limit: batchSize,
-          offset: offset,
-        };
-
-        // Only include user_id if it's set
-        if (this.settings.userId) {
-          requestBody.user_id = this.settings.userId;
-        }
+      // Fetch all memories with pagination using /api/memories endpoint
+      while (true) {
+        const url = `${this.settings.shodhUrl}/api/memories?limit=${batchSize}&offset=${offset}`;
 
         const response = await requestUrl({
-          url: `${this.settings.shodhUrl}/api/recall`,
-          method: 'POST',
+          url: url,
+          method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.settings.apiKey}`,
           },
-          body: JSON.stringify(requestBody),
         });
 
         const data = response.json;
         const memories = data.memories || [];
+        total = data.total || 0;
 
         if (memories.length === 0) {
-          hasMore = false;
-        } else {
-          allMemories.push(...memories);
-          offset += memories.length;
-          new Notice(`Fetched ${allMemories.length} memories...`);
+          break;
+        }
 
-          // If we got fewer than batchSize, we've reached the end
-          if (memories.length < batchSize) {
-            hasMore = false;
-          }
+        allMemories.push(...memories);
+        offset += memories.length;
+
+        new Notice(`Fetched ${allMemories.length}/${total} memories...`);
+
+        // If we got fewer than batchSize, we've reached the end
+        if (memories.length < batchSize) {
+          break;
         }
       }
 
