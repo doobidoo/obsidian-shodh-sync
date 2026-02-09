@@ -76,6 +76,29 @@ export default class ShodhSync extends Plugin {
     }
   }
 
+  generateFileName(mem: any, date: string): string {
+    // Extract first line or first 50 chars of content as title
+    let title = mem.content.split('\n')[0].trim();
+    if (title.length > 50) {
+      title = title.substring(0, 50);
+    }
+
+    // Remove special characters and replace spaces with hyphens
+    title = title
+      .replace(/[^\w\s\-äöüÄÖÜß]/g, '')
+      .replace(/\s+/g, '-')
+      .toLowerCase();
+
+    // If title is empty or too short, use memory type
+    if (title.length < 3) {
+      title = mem.memory_type?.toLowerCase() || 'memory';
+    }
+
+    // Add date prefix and first 8 chars of ID to ensure uniqueness
+    const shortId = mem.id.substring(0, 8);
+    return `${date}_${title}_${shortId}`;
+  }
+
   async processMemories(memories: any[]) {
     const folder = this.settings.syncFolder;
     for (const mem of memories) {
@@ -84,12 +107,15 @@ export default class ShodhSync extends Plugin {
       const year = date.split('-')[0];
       const month = date.split('-')[1];
       const folderPath = `${folder}/${year}/${month}`;
-      const path = `${folderPath}/${mem.id || 'untitled'}.md`;
+
+      const fileName = this.generateFileName(mem, date);
+      const path = `${folderPath}/${fileName}.md`;
 
       const content = `---
 date: ${date}
 tags: [${tags.join(', ')}]
 type: ${mem.memory_type || 'unknown'}
+id: ${mem.id}
 ---
 
 ${mem.content}
