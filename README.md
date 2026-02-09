@@ -2,6 +2,8 @@
 
 Sync your Shodh memories into Obsidian vault hierarchically.
 
+**🔗 Related Project**: [SHODH on Cloudflare](https://github.com/doobidoo/shodh-cloudflare) - The backend API that powers this plugin
+
 ## Install
 
 1. Obsidian → Settings → Community Plugins → Browse.
@@ -24,7 +26,11 @@ Hierarchie: Year/Month/ID.md (tags in frontmatter).
 
 ## API
 
-Uses Shodh `/api/recall` POST {user_id, query:'*'}.
+Uses Shodh API endpoints:
+- `GET /api/memories` - List all memories with pagination
+- Authentication via `Authorization: Bearer {apiKey}` header
+
+For API details, see [shodh-cloudflare](https://github.com/doobidoo/shodh-cloudflare).
 
 ## Dev
 
