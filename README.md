@@ -1,4 +1,4 @@
-# Obsidian Shodh Sync
+# Shodh Sync
 
 Sync your Shodh memories into Obsidian vault hierarchically.
 
@@ -7,15 +7,15 @@ Sync your Shodh memories into Obsidian vault hierarchically.
 ## Install
 
 1. Obsidian → Settings → Community Plugins → Browse.
-2. Search 'Shodh Sync' or GitHub URL: `doobidoo/obsidian-shodh-sync`.
+2. Search 'Shodh Sync'.
 3. Enable.
 
 ## Setup
 
 Settings:
 - **Shodh URL**: `http://localhost:3030` (or Cloudflare).
-- **API Key**: From Shodh (df2db195...).
-- **User ID**: 'henry'.
+- **API Key**: Your Shodh API key.
+- **User ID**: Your Shodh user ID.
 - **Sync Folder**: 'Memories' → Creates `Memories/2026/02/memory.md`.
 
 ## Usage
@@ -35,4 +35,3 @@ For API details, see [shodh-cloudflare](https://github.com/doobidoo/shodh-cloudf
 ## Dev
 
 `pnpm i` → `pnpm build`.
-
